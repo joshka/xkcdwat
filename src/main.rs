@@ -4,6 +4,8 @@ use axum::{
     routing::get,
     Router,
 };
+use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use tracing::Level;
 
 async fn readme() -> Html<String> {
     let readme = include_str!("../README.md");
@@ -52,8 +54,19 @@ async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse, StatusC
 
 #[shuttle_runtime::main]
 async fn main() -> shuttle_axum::ShuttleAxum {
+    tracing_subscriber::fmt::init();
     let router = Router::new()
         .route("/", get(readme))
-        .route("/feed", get(feed));
+        .route("/feed", get(feed))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(
+                    DefaultMakeSpan::new()
+                        .level(Level::INFO)
+                        .include_headers(true),
+                )
+                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(DefaultOnResponse::new().level(Level::INFO)),
+        );
     Ok(router.into())
 }
