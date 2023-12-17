@@ -1,12 +1,11 @@
 use axum::{
-    http::{self, HeaderMap},
-    response::{IntoResponse, Response},
+    http::{header, HeaderMap, StatusCode},
+    response::{self, Html, IntoResponse, Response},
     routing::get,
     Router,
 };
-use reqwest::Client;
 
-async fn readme() -> axum::response::Html<String> {
+async fn readme() -> Html<String> {
     let readme = include_str!("../README.md");
     let parser = pulldown_cmark::Parser::new(readme);
     let mut html_output = String::new();
@@ -14,21 +13,21 @@ async fn readme() -> axum::response::Html<String> {
     html_output.into()
 }
 
-async fn feed(headers: HeaderMap) -> axum::response::Result<impl IntoResponse, http::StatusCode> {
-    // this is a mess - I'm sure there's a much neater way, but I mostly let Copilot write this
+async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse, StatusCode> {
+    let client = reqwest::Client::new();
     let content_type = headers
-        .get("Accept")
+        .get(header::ACCEPT)
         .and_then(|v| v.to_str().ok())
         .unwrap_or("application/rss+xml");
-    let client = Client::new();
-    client
+    let request = client
         .get("https://xkcd.com/rss.xml")
-        .header("Accept", content_type)
+        .header(reqwest::header::ACCEPT, content_type)
         .build()
-        .map_err(|_e| http::StatusCode::INTERNAL_SERVER_ERROR)?;
-    let xkcd_response = reqwest::get("https://xkcd.com/rss.xml")
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let xkcd_response = client
+        .execute(request)
         .await
-        .map_err(|_e| http::StatusCode::BAD_GATEWAY)?;
+        .map_err(|_| StatusCode::BAD_GATEWAY)?;
     let content_type = &xkcd_response
         .headers()
         .get("Content-Type")
@@ -38,7 +37,7 @@ async fn feed(headers: HeaderMap) -> axum::response::Result<impl IntoResponse, h
     let feed = xkcd_response
         .text()
         .await
-        .map_err(|_e| http::StatusCode::BAD_GATEWAY)?;
+        .map_err(|_e| StatusCode::BAD_GATEWAY)?;
 
     let feed = feed.replace("xkcd.com", "xkcd.com - with alt-text");
 
@@ -47,7 +46,7 @@ async fn feed(headers: HeaderMap) -> axum::response::Result<impl IntoResponse, h
     let response = Response::builder()
         .header("Content-Type", content_type)
         .body(feed.to_string())
-        .map_err(|_e| http::StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     Ok(response)
 }
 
