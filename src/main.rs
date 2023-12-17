@@ -55,6 +55,5 @@ async fn main() -> shuttle_axum::ShuttleAxum {
     let router = Router::new()
         .route("/", get(readme))
         .route("/feed", get(feed));
-
     Ok(router.into())
 }

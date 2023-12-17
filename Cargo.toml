@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.6.20"
+axum = "0.7.2"
 pulldown-cmark = "0.9.3"
 regex = "1.10.2"
 reqwest = "0.11.22"
-shuttle-axum = "0.32.0"
-shuttle-runtime = "0.32.0"
-tokio = "1.28.2"
+shuttle-axum = { version = "0.35.1", default-features = false, features = ["axum-0-7"] }
+shuttle-runtime = "0.35.1"
+tokio = "1.35.0"
 tracing = "0.1.40"
