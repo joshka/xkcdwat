@@ -598,9 +598,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "h2"
-version = "0.3.21"
+version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91fc23aa11be92976ef4729127f1a74adf36d8436f7816b185d18df956790833"
+checksum = "bb2c4422095b67ee78da96fbb51a4cc413b3b25883c7717ff7ca1ab31022c9c9"
 dependencies = [
  "bytes",
  "fnv",
@@ -608,7 +608,7 @@ dependencies = [
  "futures-sink",
  "futures-util",
  "http 0.2.10",
- "indexmap 1.9.3",
+ "indexmap 2.1.0",
  "slab",
  "tokio",
  "tokio-util",
@@ -766,7 +766,7 @@ dependencies = [
  "futures-channel",
  "futures-core",
  "futures-util",
- "h2 0.3.21",
+ "h2 0.3.24",
  "http 0.2.10",
  "http-body 0.4.5",
  "httparse",
@@ -1588,7 +1588,7 @@ dependencies = [
  "encoding_rs",
  "futures-core",
  "futures-util",
- "h2 0.3.21",
+ "h2 0.3.24",
  "http 0.2.10",
  "http-body 0.4.5",
  "hyper 0.14.27",
@@ -2281,7 +2281,7 @@ dependencies = [
  "bytes",
  "futures-core",
  "futures-util",
- "h2 0.3.21",
+ "h2 0.3.24",
  "http 0.2.10",
  "http-body 0.4.5",
  "hyper 0.14.27",
@@ -2308,7 +2308,7 @@ dependencies = [
  "axum 0.6.20",
  "base64",
  "bytes",
- "h2 0.3.21",
+ "h2 0.3.24",
  "http 0.2.10",
  "http-body 0.4.5",
  "hyper 0.14.27",
