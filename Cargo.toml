@@ -1,16 +1,20 @@
 [package]
-name = "xkcd-with-alt-text"
+name = "xkcdwat"
+description = "A wrapper around the xkcd feed to display the alt text in the "
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "xkcdwat"
+path = "src/main.rs"
+
 [dependencies]
-axum = "0.7.2"
-pulldown-cmark = "0.9.3"
-regex = "1.10.2"
-reqwest = "0.11.22"
-shuttle-axum = { version = "0.35.1", default-features = false, features = ["axum-0-7"] }
-shuttle-runtime = { version = "0.35.1", default-features = false }
-tokio = "1.35.0"
-tower-http = { version = "0.5.0", features = ["trace"] }
+axum = "0.7.4"
+color-eyre = "0.6.2"
+pulldown-cmark = "0.10.0"
+regex = "1.10.3"
+reqwest = "0.11.24"
+tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros"] }
+tower-http = { version = "0.5.1", features = ["trace"] }
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"

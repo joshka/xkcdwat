@@ -5,7 +5,7 @@ use axum::{
     Router,
 };
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
-use tracing::Level;
+use tracing::{info, Level};
 
 async fn readme() -> Html<String> {
     let readme = include_str!("../README.md");
@@ -52,21 +52,23 @@ async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse, StatusC
     Ok(response)
 }
 
-#[shuttle_runtime::main]
-async fn main() -> shuttle_axum::ShuttleAxum {
+#[tokio::main]
+async fn main() -> color_eyre::Result<()> {
+    color_eyre::install()?;
     tracing_subscriber::fmt::init();
-    let router = Router::new()
+    let include_headers = DefaultMakeSpan::new()
+        .level(Level::INFO)
+        .include_headers(true);
+    let trace_layer = TraceLayer::new_for_http()
+        .make_span_with(include_headers)
+        .on_request(DefaultOnRequest::new().level(Level::INFO))
+        .on_response(DefaultOnResponse::new().level(Level::INFO));
+    let app = Router::new()
         .route("/", get(readme))
         .route("/feed", get(feed))
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(
-                    DefaultMakeSpan::new()
-                        .level(Level::INFO)
-                        .include_headers(true),
-                )
-                .on_request(DefaultOnRequest::new().level(Level::INFO))
-                .on_response(DefaultOnResponse::new().level(Level::INFO)),
-        );
-    Ok(router.into())
+        .layer(trace_layer);
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
+    info!("Listening on {}", listener.local_addr()?);
+    axum::serve(listener, app).await.unwrap();
+    Ok(())
 }
