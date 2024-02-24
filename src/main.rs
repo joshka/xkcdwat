@@ -4,8 +4,10 @@ use axum::{
     routing::get,
     Router,
 };
-use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
-use tracing::{info, Level};
+use tower_http::trace::{
+    DefaultMakeSpan, DefaultOnFailure, DefaultOnRequest, DefaultOnResponse, TraceLayer,
+};
+use tracing::{error, info, Level};
 
 async fn readme() -> Html<String> {
     let readme = include_str!("../README.md");
@@ -25,29 +27,31 @@ async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse> {
         .get("https://xkcd.com/rss.xml")
         .header(reqwest::header::ACCEPT, content_type)
         .build()
-        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
-    let xkcd_response = client
-        .execute(request)
-        .await
-        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
+        .map_err(|e| {
+            error!("Failed to build request: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+    let xkcd_response = client.execute(request).await.map_err(|e| {
+        error!("Failed to execute request: {}", e);
+        StatusCode::BAD_GATEWAY
+    })?;
     let content_type = &xkcd_response
         .headers()
         .get("Content-Type")
         .and_then(|v| v.to_str().ok())
         .unwrap_or("application/rss+xml")
         .to_string();
-    let feed = xkcd_response
-        .text()
-        .await
-        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
-
-    let feed = feed.replace("xkcd.com", "xkcd.com - with alt-text");
+    let feed = xkcd_response.text().await.map_err(|e| {
+        error!("Failed to read response: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
 
     let re = regex::Regex::new(r#"(&lt;img.*? alt="(?<alt>.*?)".*?&gt;)"#).unwrap();
+    let feed = feed.replace("xkcd.com", "xkcd.com - with alt-text");
     let feed = re.replace_all(&feed, "\n$0\n&lt;p&gt;alt-text: $alt&lt;/p&gt;\n");
+    let feed = feed.to_string();
 
-    let response = ([(header::CONTENT_TYPE, content_type)], feed.to_string()).into_response();
-    Ok(response)
+    Ok(([(header::CONTENT_TYPE, content_type)], feed).into_response())
 }
 
 #[tokio::main]
@@ -60,7 +64,8 @@ async fn main() -> color_eyre::Result<()> {
     let trace_layer = TraceLayer::new_for_http()
         .make_span_with(include_headers)
         .on_request(DefaultOnRequest::new().level(Level::INFO))
-        .on_response(DefaultOnResponse::new().level(Level::INFO));
+        .on_response(DefaultOnResponse::new().level(Level::INFO))
+        .on_failure(DefaultOnFailure::new().level(Level::ERROR));
     let app = Router::new()
         .route("/", get(readme))
         .route("/feed", get(feed))
