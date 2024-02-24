@@ -1,6 +1,6 @@
 use axum::{
     http::{header, HeaderMap, StatusCode},
-    response::{self, Html, IntoResponse, Response},
+    response::{self, Html, IntoResponse},
     routing::get,
     Router,
 };
@@ -15,7 +15,7 @@ async fn readme() -> Html<String> {
     html_output.into()
 }
 
-async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse, StatusCode> {
+async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse> {
     let client = reqwest::Client::new();
     let content_type = headers
         .get(header::ACCEPT)
@@ -25,11 +25,11 @@ async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse, StatusC
         .get("https://xkcd.com/rss.xml")
         .header(reqwest::header::ACCEPT, content_type)
         .build()
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
     let xkcd_response = client
         .execute(request)
         .await
-        .map_err(|_| StatusCode::BAD_GATEWAY)?;
+        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
     let content_type = &xkcd_response
         .headers()
         .get("Content-Type")
@@ -39,16 +39,14 @@ async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse, StatusC
     let feed = xkcd_response
         .text()
         .await
-        .map_err(|_e| StatusCode::BAD_GATEWAY)?;
+        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
 
     let feed = feed.replace("xkcd.com", "xkcd.com - with alt-text");
 
     let re = regex::Regex::new(r#"(&lt;img.*? alt="(?<alt>.*?)".*?&gt;)"#).unwrap();
     let feed = re.replace_all(&feed, "\n$0\n&lt;p&gt;alt-text: $alt&lt;/p&gt;\n");
-    let response = Response::builder()
-        .header("Content-Type", content_type)
-        .body(feed.to_string())
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let response = ([(header::CONTENT_TYPE, content_type)], feed.to_string()).into_response();
     Ok(response)
 }
 
