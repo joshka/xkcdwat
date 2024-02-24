@@ -39,7 +39,7 @@ async fn redirect_host_name(Host(host): Host, request: Request, next: Next) -> R
     if host.to_lowercase() == "xkcd-with-alt-text.joshka.net" {
         let uri = Uri::builder()
             .scheme("https")
-            .authority("xkcd-with-alt-text.joshka.net")
+            .authority("xkcdwat.joshka.net")
             .path_and_query(request.uri().path_and_query().unwrap().to_string())
             .build()
             .unwrap()
