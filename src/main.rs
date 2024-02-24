@@ -47,7 +47,11 @@ async fn feed(headers: HeaderMap) -> response::Result<impl IntoResponse> {
     })?;
 
     let re = regex::Regex::new(r#"(&lt;img.*? alt="(?<alt>.*?)".*?&gt;)"#).unwrap();
-    let feed = feed.replace("xkcd.com", "xkcd.com - with alt-text");
+    let feed = feed.replacen(
+        "<title>xkcd.com</title>",
+        "<title>xkcdwat (xkcd with alt-text)</title>",
+        1,
+    );
     let feed = re.replace_all(&feed, "\n$0\n&lt;p&gt;alt-text: $alt&lt;/p&gt;\n");
     let feed = feed.to_string();
 
