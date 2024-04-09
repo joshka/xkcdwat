@@ -17,6 +17,6 @@ updates:
     schedule:
       interval: "weekly"
     groups:
-      version-updates:
+      all-dependencies:
         patterns:
           - "*"
