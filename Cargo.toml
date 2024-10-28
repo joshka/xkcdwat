@@ -12,9 +12,9 @@ path = "src/main.rs"
 axum = "0.7.7"
 color-eyre = "0.6.3"
 pulldown-cmark = "0.12.2"
-regex = "1.11.0"
-reqwest = { version = "0.12.8", default-features = false, features = ["rustls-tls"] }
-tokio = { version = "1.40.0", features = ["rt-multi-thread", "macros"] }
+regex = "1.11.1"
+reqwest = { version = "0.12.9", default-features = false, features = ["rustls-tls"] }
+tokio = { version = "1.41.0", features = ["rt-multi-thread", "macros"] }
 tower-http = { version = "0.6.1", features = ["trace"] }
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
