@@ -10,6 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 axum = "0.8.1"
+axum-extra = "0.10.0"
 color-eyre = "0.6.3"
 pulldown-cmark = "0.12.2"
 regex = "1.11.1"
