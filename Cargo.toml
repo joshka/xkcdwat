@@ -3,6 +3,7 @@ name = "xkcdwat"
 description = "A wrapper around the xkcd feed to display the alt text in the "
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.78"
 
 [[bin]]
 name = "xkcdwat"
