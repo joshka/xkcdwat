@@ -10,9 +10,9 @@ name = "xkcdwat"
 path = "src/main.rs"
 
 [dependencies]
-axum = "0.8.3"
+axum = "0.8.4"
 axum-extra = "0.10.1"
-color-eyre = "0.6.3"
+color-eyre = "0.6.4"
 pulldown-cmark = "0.13.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.15", default-features = false, features = ["rustls-tls"] }
