@@ -3,19 +3,21 @@ name = "xkcdwat"
 description = "A wrapper around the xkcd feed to display the alt text in the "
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.78"
+rust-version = "1.82"
 
 [[bin]]
 name = "xkcdwat"
 path = "src/main.rs"
 
 [dependencies]
-axum = "0.8.3"
+axum = "0.8.4"
 axum-extra = "0.10.1"
-color-eyre = "0.6.3"
+color-eyre = "0.6.4"
 pulldown-cmark = "0.13.0"
 regex = "1.11.1"
-reqwest = { version = "0.12.15", default-features = false, features = ["rustls-tls"] }
+reqwest = { version = "0.12.15", default-features = false, features = [
+    "rustls-tls",
+] }
 tokio = { version = "1.44.2", features = ["rt-multi-thread", "macros"] }
 tower-http = { version = "0.6.2", features = ["trace"] }
 tracing = "0.1.41"
