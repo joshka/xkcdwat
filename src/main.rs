@@ -1,11 +1,9 @@
-use axum::{
-    extract::Request,
-    http::{header, HeaderMap, StatusCode, Uri},
-    middleware::{self, Next},
-    response::{self, Html, IntoResponse, Redirect, Response},
-    routing::get,
-    Router,
-};
+use axum::extract::Request;
+use axum::http::{header, HeaderMap, StatusCode, Uri};
+use axum::middleware::{self, Next};
+use axum::response::{self, Html, IntoResponse, Redirect, Response};
+use axum::routing::get;
+use axum::Router;
 use axum_extra::extract::Host;
 use tower_http::trace::{
     DefaultMakeSpan, DefaultOnFailure, DefaultOnRequest, DefaultOnResponse, TraceLayer,
