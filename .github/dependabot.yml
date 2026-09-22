@@ -1,17 +1,21 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
+# Dependabot keeps the workflow actions and Cargo lockfile current. Group each ecosystem's
+# updates so routine maintenance arrives in a small number of pull requests.
+# Configuration reference:
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
 updates:
-  # Maintain dependencies for GitHub Actions
+  # Maintain dependencies for GitHub Actions.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      actions:
+        patterns:
+          - "*"
 
-  # Maintain dependencies for Cargo
+  # Maintain Cargo dependencies in one reviewable lockfile refresh.
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
