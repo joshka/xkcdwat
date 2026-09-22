@@ -1,25 +1,40 @@
-# Dependabot keeps the workflow actions and Cargo lockfile current. Group each ecosystem's
-# updates so routine maintenance arrives in a small number of pull requests.
+# This small service does not need a separate PR for every routine dependency release. Weekly
+# groups and cooldowns reduce review noise. Cooldowns do not delay security updates.
 # Configuration reference:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 
 version: 2
 updates:
-  # Maintain dependencies for GitHub Actions.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns:
           - "*"
 
-  # Maintain Cargo dependencies in one reviewable lockfile refresh.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
     groups:
       all-dependencies:
         patterns:

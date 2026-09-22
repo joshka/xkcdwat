@@ -1,8 +1,8 @@
-# configuration for https://rust-lang.github.io/rustfmt/
+# The project uses nightly rustfmt for its preferred import and comment layout. These unstable
+# options are why CI formats with nightly even though builds and tests use stable Rust.
 
 use_field_init_shorthand = true
 
-# unstable options
 comment_width = 100
 format_code_in_doc_comments = true
 format_macro_matchers = true

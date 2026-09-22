@@ -1,5 +1,7 @@
 name: CI
 
+# GitHub checks Rust code and the deployable Wasm bundle. Deployment belongs to the separately
+# configured Cloudflare Workers Builds integration, so this workflow needs no Cloudflare credential.
 on:
   push:
     branches: [main]
@@ -8,80 +10,47 @@ on:
 permissions:
   contents: read
 
-env:
-  CARGO_TERM_COLOR: always
-
 concurrency:
-  # Cancel superseded pull request checks, but let main deployments finish.
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   format:
-    name: Format / nightly
+    name: Format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      # rustfmt.toml uses unstable options.
+      # The chosen rustfmt layout needs nightly; production compilation still uses stable.
       - uses: dtolnay/rust-toolchain@be39649afda95dbf70f87cce95f68b8d5797b296 # nightly
         with:
           toolchain: nightly
           components: rustfmt
       - run: cargo fmt -- --check
 
-  rust:
-    name: Rust / stable
+  verify:
+    name: Verify
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
         with:
           toolchain: stable
+          targets: wasm32-unknown-unknown
           components: clippy
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-      - uses: clechasseur/rs-clippy-check@62ad100473a5e6513e86407b859091115ec89ae3 # v6.0.5
-        with:
-          toolchain: stable
-          args: --locked --all-features --all-targets
-      - run: cargo test --locked --all-features --all-targets
-
-  docs:
-    name: Docs / nightly
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-      # Retain the nightly docsrs build from the previous shared workflow.
-      - uses: dtolnay/rust-toolchain@be39649afda95dbf70f87cce95f68b8d5797b296 # nightly
-        with:
-          toolchain: nightly
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-      - run: cargo doc --locked --no-deps --all-features
-        env:
-          RUSTDOCFLAGS: --cfg docsrs
-
-  deploy:
-    name: Deploy / Fly.io
-    # Deploy only validated main commits.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [format, rust, docs]
-    runs-on: ubuntu-latest
-    concurrency:
-      group: fly-deploy
-      cancel-in-progress: false
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # master
-      - run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - uses: Swatinem/rust-cache@63fed3e2fecf6f7b51dc6f043341b79ef82a9ae7 # v2.9.2
+      - run: npm ci
+      - run: cargo test --locked
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Install the Rust Worker builder
+        run: cargo install worker-build --version '^0.8' --locked
+      # Native tests cannot verify the Wasm bundle or Wrangler configuration; a dry run checks both.
+      - run: npm run check:deploy
+      - run: npm test

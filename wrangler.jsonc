@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Keep the production Worker separate from the route-free preview so a test deploy cannot
+  // take over either public hostname.
+  "name": "xkcdwat",
+  "main": "build/index.js",
+  "compatibility_date": "2026-09-22",
+  // Production uses Custom Domains; ad hoc testing belongs to the preview Worker.
+  "workers_dev": false,
+  "preview_urls": false,
+  // Wrangler may rebuild during deploy, including after Cloudflare's separate build command.
+  // This is why deploy.sh restores Rust to PATH before invoking Wrangler.
+  "build": {
+    "command": "worker-build --release -- --locked"
+  },
+  "observability": {
+    "enabled": true,
+    // Sample production requests to diagnose upstream latency without tracing every feed poll.
+    "traces": { "enabled": true, "head_sampling_rate": 0.1 }
+  },
+  // Both hostnames must reach this Worker so it can redirect legacy subscriptions. Cloudflare
+  // cannot attach a Custom Domain while a CNAME record already exists for that hostname.
+  "routes": [
+    { "pattern": "xkcdwat.joshka.net", "custom_domain": true },
+    { "pattern": "xkcd-with-alt-text.joshka.net", "custom_domain": true }
+  ]
+}
