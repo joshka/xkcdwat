@@ -40,12 +40,12 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+      - uses: dtolnay/rust-toolchain@be39649afda95dbf70f87cce95f68b8d5797b296 # stable
         with:
           toolchain: stable
           targets: wasm32-unknown-unknown
           components: clippy
-      - uses: Swatinem/rust-cache@63fed3e2fecf6f7b51dc6f043341b79ef82a9ae7 # v2.9.2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       - run: npm ci
       - run: cargo test --locked
       - run: cargo clippy --locked --all-targets -- -D warnings
