@@ -1,18 +1,20 @@
 #!/bin/sh
-# Bootstrap Rust and build the Wasm bundle for Cloudflare Workers Builds.
+# Build the Rust Worker wherever Wrangler needs a Wasm bundle.
 #
-# The hosted image has no Rust toolchain. `npm run build` prepares it here; deploy.sh restores
-# its environment in Cloudflare's separate deploy shell so Wrangler can run its custom build.
+# Workers Builds has no Rust toolchain and runs commands in separate shells. Preparing Rust in
+# the custom build makes dev, deploy, and preview independent of a previous shell's PATH.
 set -eu
+
+if [ -f "$HOME/.cargo/env" ]; then
+  # shellcheck source=/dev/null
+  . "$HOME/.cargo/env"
+fi
 
 if ! command -v rustup >/dev/null 2>&1; then
   rustup_installer="${TMPDIR:-/tmp}/xkcdwat-rustup.sh"
   curl --proto '=https' --tlsv1.2 --fail --silent --show-error https://sh.rustup.rs \
     --output "$rustup_installer"
   sh "$rustup_installer" -y --profile minimal --default-toolchain stable
-fi
-
-if [ -f "$HOME/.cargo/env" ]; then
   # shellcheck source=/dev/null
   . "$HOME/.cargo/env"
 fi
