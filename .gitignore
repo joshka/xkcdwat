@@ -1,3 +1,8 @@
+# Local Rust, Wrangler, and npm outputs are reproducible from the checked-in manifests.
 /target
-.shuttle-storage
-Secrets*.toml
+/build
+/node_modules
+/.wrangler
+# Local development credentials must not enter the repository.
+.dev.vars*
+.env*

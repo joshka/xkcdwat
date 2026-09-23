@@ -1,0 +1,15 @@
+{
+  "name": "xkcdwat-worker",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "sh scripts/build.sh",
+    "deploy": "sh scripts/deploy.sh",
+    "deploy:preview": "sh scripts/deploy.sh --config wrangler.preview.jsonc",
+    "check:deploy": "wrangler deploy --dry-run",
+    "test": "node --test tests/worker.test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "4.136.3"
+  }
+}

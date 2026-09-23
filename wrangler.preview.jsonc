@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Use a separate workers.dev address to verify the Wasm service before deploying to production.
+  // Keep this configuration route-free so preview deploys cannot serve the public hostnames.
+  "name": "xkcdwat-preview",
+  "main": "build/index.js",
+  "compatibility_date": "2026-09-22",
+  "workers_dev": true,
+  "preview_urls": false,
+  "build": {
+    "command": "worker-build --release -- --locked"
+  },
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true, "head_sampling_rate": 1 }
+  }
+}
