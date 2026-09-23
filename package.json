@@ -4,8 +4,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "sh scripts/build.sh",
-    "deploy": "sh scripts/deploy.sh",
-    "deploy:preview": "sh scripts/deploy.sh --config wrangler.preview.jsonc",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler preview",
     "check:deploy": "wrangler deploy --dry-run",
     "test": "node --test tests/worker.test.mjs"
   },

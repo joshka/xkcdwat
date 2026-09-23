@@ -1,17 +1,15 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  // Keep the production Worker separate from the route-free preview so a test deploy cannot
-  // take over either public hostname.
   "name": "xkcdwat",
   "main": "build/index.js",
   "compatibility_date": "2026-09-22",
-  // Production uses Custom Domains; ad hoc testing belongs to the preview Worker.
+  // Production uses Custom Domains; branch previews get public workers.dev URLs.
   "workers_dev": false,
-  "preview_urls": false,
-  // Wrangler may rebuild during deploy, including after Cloudflare's separate build command.
-  // This is why deploy.sh restores Rust to PATH before invoking Wrangler.
+  "preview_urls": true,
+  // The Worker has no bindings or secrets that need preview-specific values.
+  "previews": {},
   "build": {
-    "command": "worker-build --release -- --locked"
+    "command": "sh scripts/build.sh"
   },
   "observability": {
     "enabled": true,

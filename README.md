@@ -57,15 +57,23 @@ unaffected.
 
 ## Deployment
 
-Workers Builds uses its own build image, which does not include Rust. Its build command runs
-`npm run build` to install stable Rust, the Wasm target, and `worker-build` before compiling the
-Worker. Its deploy command runs `npm run deploy`, which adds Rust to `PATH` before Wrangler's
-custom build. Cloudflare's Git integration manages the deploy credential; the GitHub workflow
-does not need Cloudflare secrets.
+Wrangler's custom build prepares Rust and compiles the Worker for both deployment and preview.
+It also works in Workers Builds, whose image does not include Rust. Configure the hosted commands
+as follows:
+
+| Setting | Command |
+| --- | --- |
+| Build command | Leave empty |
+| Deploy command | `npx wrangler deploy` |
+| Preview command | `npx wrangler preview` |
+
+`npm run deploy` and `npm run preview` invoke those same Wrangler commands. Cloudflare's Git
+integration manages the deploy credential; the GitHub workflow does not need Cloudflare secrets.
+Branch previews use public `workers.dev` URLs and do not change production routing. Locally, use
+`npm run preview -- --name <name>` to choose a preview name explicitly.
 
 For initial setup:
 
-1. Deploy `xkcdwat-preview` with `npm run deploy:preview` and verify its `workers.dev` URL.
 1. Open a pull request, wait for its Format and Verify checks in GitHub Actions to pass, then
    merge it into `main` before connecting automatic deployment.
 1. Remove any existing CNAME records for the two hostnames in Cloudflare DNS, then run
@@ -73,12 +81,11 @@ For initial setup:
    waiting for the first hosted Rust build during the DNS cutover.
 1. Connect the existing `xkcdwat` Worker to this repository in Cloudflare Workers & Pages. Grant
    the Cloudflare GitHub app access to this repository. Select `main` as the production branch,
-   set **Build command** to `npm run build`, and set **Deploy command** to `npm run deploy`.
+   use the commands above, and enable preview builds for non-production branches if wanted.
 1. Check the first Workers Build and subsequent pushes to `main`.
 1. Check `/`, `/feed`, and the legacy redirect on the production hostnames.
 
 Cloudflare cannot attach a Worker Custom Domain while a CNAME exists for that hostname. The
-preview Worker makes it possible to verify the code before changing DNS. The GitHub connection
-and DNS cutover require account access. Cloudflare's Builds API can configure triggers, but
-`wrangler login` does not grant that API's separate Workers Builds Configuration permission; use
-a user-scoped API token for API-based setup.
+GitHub connection and DNS cutover require account access. Cloudflare's Builds API can configure
+triggers, but `wrangler login` does not grant that API's separate Workers Builds Configuration
+permission; use a user-scoped API token for API-based setup.
