@@ -22,7 +22,7 @@ runtime and deployment CLI.
 
 ```sh
 rustup target add wasm32-unknown-unknown
-cargo install worker-build --version '^0.8' --locked
+cargo install worker-build --version '^0.9' --locked
 npm ci
 npm run dev
 ```
