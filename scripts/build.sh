@@ -23,7 +23,7 @@ export RUSTUP_TOOLCHAIN=stable
 rustup target add wasm32-unknown-unknown
 
 if ! command -v worker-build >/dev/null 2>&1; then
-  cargo install worker-build --version '^0.8' --locked
+  cargo install worker-build --version '^0.9' --locked
 fi
 
 worker-build --release -- --locked

@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 pulldown-cmark = "0.13"
 regex = "1"
-worker = "0.8"
+worker = "0.9"
 
 # Reduce the Wasm bundle uploaded to Workers.
 [profile.release]

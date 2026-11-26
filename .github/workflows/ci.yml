@@ -50,7 +50,7 @@ jobs:
       - run: cargo test --locked
       - run: cargo clippy --locked --all-targets -- -D warnings
       - name: Install the Rust Worker builder
-        run: cargo install worker-build --version '^0.8' --locked
+        run: cargo install worker-build --version '^0.9' --locked
       # Native tests cannot verify the Wasm bundle or Wrangler configuration; a dry run checks both.
       - run: npm run check:deploy
       - run: npm test
